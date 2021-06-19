@@ -15,6 +15,10 @@ In this paper, we propose a blended transfer learning and multi-task learning mo
 
 In the next section, we discuss previous work in transfer learning and multi-task image classification. Then, in section 3 we describe the CUB 200-2011 dataset. In section 4, we outline our single- and dual-task model architectures. In section 5, we discuss our evaluation metrics and experimental results. Finally, in sections 5 and 6, we discuss our findings and conclusions.
 
+<p align="center">
+<img width="633" alt="Figure 1a. Sample bird images with species labels from CUB 200-2011 classes 1-36" src="https://user-images.githubusercontent.com/31581146/122655219-83e43e00-d159-11eb-9b3d-56f066898488.png">  |  <img width="300" alt="Figure 1b. Sample bird with species class labeland binary multi-label attributes vector." src="Images/Sample Bird.png">
+</p>
+ 
 ## 2. Related Work
 
 ### 2.1. Transfer Learning for Species Classification
@@ -32,6 +36,10 @@ We similarly explore visual and non-visual training data for classification, but
 ## 3. Dataset - CUB 200-2011
 
 The Caltech-UC San Diego Birds (CUB) 200-2011 dataset contains 11,788 labeled images of birds in 200 speciescategories  [Wah  et  al.,  2011].   For  each  image,  the  dataset  includes  a  312-element  vector  of  confidence  scorescorresponding to 312 fine-grain attributes, such as bill shape, wing color, eye color, etc. We provide a visualizationof the dataset, species labels, and attribute vectors in Figure 1. These annotations are collected through the AmazonMechanical Turk platform, where the annotators are required to mark at least 10 feature labels and were are notprovided additional information about the image species. Given that annotators were not domain experts and there aresimilarities between the pre-defined attribute labels, the ground-truth annotations are subject to some inaccuracies andambiguity. To speed up training for the purposes of this paper, we train using the first 2000 images (36 species classes)of CUB 200-2011.
+
+<p align="center">
+<img width="600" alt="Figure 2: Dual-task model architecture for classifying bird species and binary attributes.." src="Images/Dual-Task Model.png">
+</p>
 
 ## 4. Methods
 
@@ -63,13 +71,29 @@ In our experiments, we trained a single-task species classifier, a single-task a
 
 We evaluate the species classification score based on accuracy and F1-score and we evaluate attribute classificationperformance based on F1-score only. Since the binary attribute vectors are sparse, a high accuracy score is misleadingeven when there are lots of false 0’s in the predicted array. This can be seen in Fig. 1, where a baseline accuracy scorefor a random attribute classifier is 90.5%.
 
-Each image belongs to one of 36 species classes and corresponds to 312 binary attributes. Each 312-element binaryattribute vector contains a mean of291’s and2830’s.  For random baseline models, we define a random speciesclassifier that has probability1/36 = 0.0278of correctly classifying an image and a random attributes classifier that assigns an element to “1" with probability29/312 = 0.093. We summarize their expected accuracy and F1-scores inTable 1. We would thus expect our species classifier predictions to reach accuracy of more than0.278and our attributesclassifier predictions to reach F1-score of more than0.171in order to beat random chance.
+Accuracy and F1-score are given by
+
+<p align="center">
+<img width="400" alt="" src="Images/Accuracy and F1 Equations.png">
+</p>
+
+where TP is the number of true positives, TN is the number of true negatives, FP is the number of false positives, andFN the number of false negatives.
+
+Each image belongs to one of 36 species classes and corresponds to 312 binary attributes. Each 312-element binaryattribute vector contains a mean of 29 1’s and 283 0’s.  For random baseline models, we define a random speciesclassifier that has probability1/36 = 0.0278of correctly classifying an image and a random attributes classifier that assigns an element to “1" with probability 29/312 = 0.093. We summarize their expected accuracy and F1-scores inTable 1. We would thus expect our species classifier predictions to reach accuracy of more than 0.278and our attributesclassifier predictions to reach F1-score of more than0.171in order to beat random chance.
+
+<p align="center">
+<img width="400" alt="" src="Images/Baseline Metrics.png">
+</p>
 
 ### 5.2. Quantitative Results
 
 We compare the results of the single-task transfer models and dual-task model trained on the full dataset in Table2.  We note that both methods significantly outperform baseline random chance scores for both classification tasks.Although the single-task species classifier outperforms the dual-task classifier for species classification by10.09%, theclassification F1-score for attribute classification by the dual-task model exceeds the single-task attributes classifier by 11.82%.
 
-Next, we evaluated the performance of single- and dual-task models when reducing the number of expert-labelledtraining examples. The results are plotted in Fig. 4. We observe that the dual-task model continues to dominate thesingle-task attributes classifier, even with only 40% of labelled training examples available for training.
+<p align="center">
+<img width="600" alt="" src="Images/Quantitative Results.png">
+</p>
+
+Next, we evaluated the performance of single- and dual-task models when reducing the number of expert-labelled training examples. The results are plotted in Fig. 4. We observe that the dual-task model continues to dominate thesingle-task attributes classifier, even with only 40% of labelled training examples available for training.
 
 ### 5.3. Qualitative Results
 
@@ -79,9 +103,17 @@ From our quantitative analysis, we can generalize that for the current implement
 
 Our main success is showing that the dual-task model largely increases the F1-score for attributes classification. In Fig.3, we show three examples comparing single-task and dual-task model attribute predictions. In each case, we show that the dual-task modelidentifies bird attributes with a greater number of true positives and fewer numbers offalse positives and false negativesthan the single-task model. In particular, we find that the dual-task modelbetterpredicts colors, relative sizes of body parts, and fine-grain shapesthan the single-task model. The dual-task modelperforms especially well for birds that exhibit more common features or very visible features, while still identifyingfiner-grain details than the single-task model.
 
+<p align="center">
+<img width="600" alt="Figure 3:  Comparison of species prediction and of select true positive (TP), false positive (FP), and false negative(FN) attribute predictions made by the single-task and dual-task models. Included are also the total scores for the full312-element vectors" src="Images/Success Cases.png">
+</p>
+
 An additional advantage of our method is that attribute vectors are easier and faster to collect than natural-languagecaptions. Moreover, as animal species contain visually distinct features, such as color, size, and pattern, attributes areeasily labelled as present or not-present even by non-expert annotators.
 
 #### 5.3.2. Failure Cases
+
+<p align="center">
+<img width="600" alt="Figure 5: Examples of error cases where image species are misclassified by both classifiers. We also select severalexamples for each input image of true positive, false positive, and false negative attribute labels predicted by thedual-task model" src="Images/Failure Cases.png">
+</p>
 
 Compared  to  the  single-task  species  classifier,  the  dual-task  model  struggles  with  three  examples  ofincorrectfalse species predictions.  The dual-task model is an improvement on the single-task attributes classifier, but stillprone tofalse positive and false negative attribute predictions. We include several examples of failure cases in Fig. 5.
 
